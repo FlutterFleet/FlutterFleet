@@ -43,7 +43,7 @@ android {
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'org.mockito:mockito-core:5.0.0'
         implementation 'org.apache.commons:commons-lang3:3.13.0'
-        api 'com.github.hcaptcha:hcaptcha-android-sdk:3.10.0'
+        api 'com.github.hcaptcha:hcaptcha-android-sdk:3.11.0'
     }
 
     testOptions {
