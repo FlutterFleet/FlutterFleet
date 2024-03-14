@@ -14,7 +14,7 @@ dependencies:
 
   path: ^1.8.2
   http_parser: ^4.0.2
-  crypto: ^3.0.2
+  crypto: ^3.0.3
   intl: ^0.18.1
   # A powerful Http client for Dart, which supports Interceptors, Global configuration, FormData, Request Cancellation, File downloading, Timeout etc.
   dio: ^5.1.1
