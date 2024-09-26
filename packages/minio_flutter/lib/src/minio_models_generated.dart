@@ -2502,7 +2502,6 @@ class Object {
     this.owner,
     this.size,
     this.storageClass,
-    this.tags,
   );
 
   Object.fromXml(XmlElement xml) {
@@ -2525,7 +2524,6 @@ class Object {
         builder.element('Owner', nest: owner!.toXml());
         builder.element('Size', nest: size.toString());
         builder.element('StorageClass', nest: storageClass);
-        builder.element('Tagging', nest: Tagging(tags).toXml());
       },
     );
     return builder.buildDocument();
@@ -2549,11 +2547,9 @@ class Object {
   /// The class of storage used to store the object.
   String? storageClass;
 
-  Tags? tags;
-
   @override
   String toString() {
-    return 'Object{eTag: $eTag, key: $key, lastModified: $lastModified, owner: $owner, size: $size, storageClass: $storageClass, tags: $tags}';
+    return 'Object{eTag: $eTag, key: $key, lastModified: $lastModified, owner: $owner, size: $size, storageClass: $storageClass}';
   }
 }
 
