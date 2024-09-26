@@ -598,7 +598,7 @@ class Minio {
       bucket: bucket,
       queries: queries,
     );
-
+    print(resp.body);
     validate(resp);
 
     final node = xml.XmlDocument.parse(resp.body);
