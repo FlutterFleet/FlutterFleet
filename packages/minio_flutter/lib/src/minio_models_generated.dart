@@ -6,6 +6,12 @@ XmlElement? getProp(XmlElement? xml, String name) {
   return result.isNotEmpty ? result.first : null;
 }
 
+Iterable<XmlElement>? getAll(XmlElement? xml, String name) {
+  if (xml == null) return null;
+  final result = xml.findAllElements(name);
+  return result.isNotEmpty ? result : null;
+}
+
 /// Specifies the days since the initiation of an incomplete multipart upload that Amazon S3 will wait before permanently removing all parts of the upload. For more information, see Aborting Incomplete Multipart Uploads Using a Bucket Lifecycle Policy in the Amazon Simple Storage Service Developer Guide.
 class AbortIncompleteMultipartUpload {
   AbortIncompleteMultipartUpload(
@@ -2496,6 +2502,7 @@ class Object {
     this.owner,
     this.size,
     this.storageClass,
+    this.tags,
   );
 
   Object.fromXml(XmlElement xml) {
@@ -2505,6 +2512,7 @@ class Object {
     owner = Owner.fromXml(getProp(xml, 'Owner'));
     size = int.tryParse(getProp(xml, 'Size')!.innerText);
     storageClass = getProp(xml, 'StorageClass')?.innerText;
+    tags = Tags.fromXml(getProp(xml, 'TagSet'));
   }
 
   XmlNode toXml() {
@@ -2518,6 +2526,7 @@ class Object {
         builder.element('Owner', nest: owner!.toXml());
         builder.element('Size', nest: size.toString());
         builder.element('StorageClass', nest: storageClass);
+        builder.element('Tagging', nest: Tagging(tags).toXml());
       },
     );
     return builder.buildDocument();
@@ -2541,9 +2550,11 @@ class Object {
   /// The class of storage used to store the object.
   String? storageClass;
 
+  Tags? tags;
+
   @override
   String toString() {
-    return 'Object{eTag: $eTag, key: $key, lastModified: $lastModified, owner: $owner, size: $size, storageClass: $storageClass}';
+    return 'Object{eTag: $eTag, key: $key, lastModified: $lastModified, owner: $owner, size: $size, storageClass: $storageClass, tags: $tags}';
   }
 }
 
@@ -4269,6 +4280,41 @@ class Tag {
   String? value;
 }
 
+class Tags {
+  Tags(
+    this.tagSet,
+  );
+
+  Tags.fromXml(XmlElement? xml) {
+    final tags = getAll(xml, 'Tag');
+    if (tags == null) return;
+    tagSet = {};
+    for (final tag in tags) {
+      tagSet!.add(Tag.fromXml(tag));
+    }
+  }
+
+  XmlNode toXml() {
+    final builder = XmlBuilder();
+    builder.element(
+      'TagSet',
+      nest: () {
+        for (final tag in tagSet!) {
+          builder.element('Tag', nest: tag.toXml());
+        }
+      },
+    );
+    return builder.buildDocument();
+  }
+
+  int length() {
+    return tagSet == null ? 0 : tagSet!.length;
+  }
+
+  /// A collection for a set of tags
+  Set<Tag>? tagSet;
+}
+
 /// Container for TagSet elements.
 class Tagging {
   Tagging(
@@ -4276,7 +4322,7 @@ class Tagging {
   );
 
   Tagging.fromXml(XmlElement? xml) {
-    tagSet = Tag.fromXml(getProp(xml, 'TagSet'));
+    tagSet = Tags.fromXml(getProp(xml, 'TagSet'));
   }
 
   XmlNode toXml() {
@@ -4291,7 +4337,7 @@ class Tagging {
   }
 
   /// A collection for a set of tags
-  Tag? tagSet;
+  Tags? tagSet;
 }
 
 /// Container for granting information.

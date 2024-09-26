@@ -6,6 +6,8 @@ import 'package:minio_flutter/src/minio_errors.dart';
 import 'package:minio_flutter/src/minio_models_generated.dart';
 import 'package:xml/xml.dart' as xml;
 
+const int maxTags = 10;
+
 bool isValidBucketName(String bucket) {
   if (bucket.length < 3 || bucket.length > 63) {
     return false;
@@ -34,6 +36,15 @@ bool isValidObjectName(String objectName) {
 bool isValidPrefix(String prefix) {
   if (prefix.length > 1024) return false;
   return true;
+}
+
+bool isValidTagSize(int length) {
+  return length < maxTags;
+}
+
+bool isValidTagName(String tagName) {
+  if (RegExp(r'^[a-zA-Z0-9]$').hasMatch(tagName)) return true;
+  return false;
 }
 
 bool isAmazonEndpoint(String endpoint) {

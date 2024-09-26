@@ -1102,6 +1102,27 @@ class Minio {
     validate(resp, expect: 204);
   }
 
+  Future<void> setObjectTags(
+    String bucket,
+    String object,
+    Tags tags,
+  ) async {
+    MinioInvalidBucketNameError.check(bucket);
+    MinioInvalidObjectNameError.check(object);
+    MinioInvalidTagsError.check(tags);
+    final payload = Tagging(tags).toXml().toString();
+    final headers = {'Content-MD5': md5Base64(payload)};
+
+    await _client.request(
+      method: 'PUT',
+      bucket: bucket,
+      object: object,
+      resource: 'tagging',
+      payload: payload,
+      headers: headers,
+    );
+  }
+
   Future<void> setObjectACL(String bucket, String object, String policy) async {
     MinioInvalidBucketNameError.check(bucket);
     MinioInvalidObjectNameError.check(object);
