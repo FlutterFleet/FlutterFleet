@@ -598,7 +598,6 @@ class Minio {
       bucket: bucket,
       queries: queries,
     );
-    print(resp.body);
     validate(resp);
 
     final node = xml.XmlDocument.parse(resp.body);
@@ -1133,6 +1132,23 @@ class Minio {
       object: object,
       queries: {'acl': policy},
     );
+  }
+
+  Future<Tags?> getObjectTags(String bucket, String object) async {
+    MinioInvalidBucketNameError.check(bucket);
+    MinioInvalidObjectNameError.check(object);
+    final resp = await _client.request(
+      method: 'GET',
+      bucket: bucket,
+      object: object,
+      resource: 'tagging',
+    );
+    validate(resp, expect: 200);
+    return Tagging.fromXml(
+        xml.XmlDocument.parse(resp.body)
+          .findElements('Tagging')
+          .first,
+    ).tagSet;
   }
 
   Future<AccessControlPolicy> getObjectACL(String bucket, String object) async {

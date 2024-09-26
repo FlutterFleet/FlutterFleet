@@ -2512,7 +2512,6 @@ class Object {
     owner = Owner.fromXml(getProp(xml, 'Owner'));
     size = int.tryParse(getProp(xml, 'Size')!.innerText);
     storageClass = getProp(xml, 'StorageClass')?.innerText;
-    tags = Tagging.fromXml(getProp(xml, 'UserTags')).tagSet;
   }
 
   XmlNode toXml() {
