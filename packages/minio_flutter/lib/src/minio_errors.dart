@@ -80,14 +80,15 @@ class MinioInvalidTagsError extends MinioError {
       throw MinioInvalidTagsError('Only $maxTags object tags allowed.');
     }
     if (tags.tagSet != null) {
-      for (final tag in tags.tagSet!) {
-        if (!isValidTagName(tag.key!)) {
-          throw MinioInvalidTagsError('Invalid tag key: ${tag.key}');
+      tags.tagSet?.forEach((key, value) {
+        if (!isValidTagName(key!)) {
+          throw MinioInvalidTagsError('Invalid tag key: $key');
         }
-        if (!isValidTagName(tag.value!)) {
-          throw MinioInvalidTagsError('Invalid tag value: ${tag.value}');
+        if (!isValidTagName(value!)) {
+          throw MinioInvalidTagsError('Invalid tag value: $value');
         }
-      }
+
+      });      
     }
   }
 }
