@@ -4283,9 +4283,11 @@ class Tags {
   Tags.fromXml(XmlElement? xml) {
     final tags = getAll(xml, 'Tag');
     if (tags == null) return;
+
     tagSet = {};
     for (final tag in tags) {
-      tagSet!.add(Tag.fromXml(tag));
+      final t = Tag.fromXml(tag);
+      tagSet![t.key] = t.value;
     }
   }
 
@@ -4294,9 +4296,9 @@ class Tags {
     builder.element(
       'TagSet',
       nest: () {
-        for (final tag in tagSet!) {
-          builder.element('Tag', nest: tag.toXml());
-        }
+        tagSet?.forEach((k, v) {
+          builder.element('Tag', nest: Tag(k, v).toXml());
+        });        
       },
     );
     return builder.buildDocument();
@@ -4307,7 +4309,7 @@ class Tags {
   }
 
   /// A collection for a set of tags
-  Set<Tag>? tagSet;
+  Map<String?, String?>? tagSet;
 }
 
 /// Container for TagSet elements.
