@@ -1,12 +1,13 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:collection/collection.dart';
 import 'package:minio_flutter/io.dart';
 import 'package:minio_flutter/minio.dart';
+import 'package:minio_flutter/src/minio_helpers.dart';
 import 'package:minio_flutter/src/minio_models_generated.dart';
 import 'package:minio_flutter/src/utils.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide Tags;
 
 import 'helpers.dart';
 
@@ -28,6 +29,8 @@ void main() {
   testRemoveBucket();
   testRemoveObject();
   testListObjects();
+  testSetObjectTags();
+  testGetObjectTags();
 }
 
 void testConstruct() {
@@ -257,6 +260,107 @@ void testFPutObject() {
 
       final stat = await minio.statObject(bucketName, objectName);
       expect(stat.size, equals(0));
+    });
+  });
+}
+
+void testSetObjectTags() {
+  group('setObjectTags', () {
+    late String bucketName;
+    late Directory tempDir;
+    File testFile;
+    const objectName = 'a.jpg';
+    final minio = getMinioClient();
+
+    setUpAll(() async {
+      bucketName = uniqueName();
+      tempDir = await Directory.systemTemp.createTemp();
+      testFile = await File('${tempDir.path}/$objectName').create();
+      await testFile.writeAsString('random bytes');
+      await minio.makeBucket(bucketName);
+      await minio.fPutObject(bucketName, objectName, testFile.path);
+    });
+
+    tearDownAll(() async {
+      await tempDir.delete(recursive: true);
+    });
+
+    test('setObjectTags() set objects tag', () async {
+      await minio.setObjectTags(
+        bucketName,
+        objectName,
+        Tags({'testKey0': 'testValue'}),
+      );
+    });
+
+    test('setObjectTags() fails when key is not alphanumeric', () {
+      expect(
+        () async => await minio.setObjectTags(
+            bucketName, objectName, Tags({'invalidKey%': 'value'})),
+        throwsA(isA<MinioInvalidTagsError>()),
+      );
+    });
+
+    test('setObjectTags() fails when value is not alphanumeric', () {
+      expect(
+        () async => await minio.setObjectTags(
+            bucketName, objectName, Tags({'testKey': 'invalidValue%'})),
+        throwsA(isA<MinioInvalidTagsError>()),
+      );
+    });
+
+    test('setObjectTags() fails when given too many tags', () {
+      final tags = <String, String>{};
+      for (var i = 0; i < maxObjectTags + 1; i++) {
+        tags['testKey$i'] = 'testValue$i';
+      }
+      expect(
+        () async => await minio.setObjectTags(
+          bucketName,
+          objectName,
+          Tags(tags),
+        ),
+        throwsA(isA<MinioInvalidTagsError>()),
+      );
+    });
+  });
+}
+
+void testGetObjectTags() {
+  group('getObjectTags', () {
+    late String bucketName;
+    late Directory tempDir;
+    File testFile;
+    const objectName = 'a.jpg';
+    final tags = Tags({'testKey': 'testValue'});
+
+    setUpAll(() async {
+      bucketName = uniqueName();
+
+      tempDir = await Directory.systemTemp.createTemp();
+      testFile = await File('${tempDir.path}/$objectName').create();
+      await testFile.writeAsString('random bytes');
+
+      final minio = getMinioClient();
+      await minio.makeBucket(bucketName);
+
+      await minio.fPutObject(bucketName, objectName, testFile.path);
+      await minio.setObjectTags(
+        bucketName,
+        objectName,
+        tags,
+      );
+    });
+
+    tearDownAll(() async {
+      await tempDir.delete(recursive: true);
+    });
+
+    test('getObjectTags', () async {
+      final minio = getMinioClient();
+      expect(
+        const MapEquality().equals(tags.tagSet, (await minio.getObjectTags(bucketName, objectName))!.tagSet), 
+        true,);
     });
   });
 }
