@@ -6,6 +6,12 @@ XmlElement? getProp(XmlElement? xml, String name) {
   return result.isNotEmpty ? result.first : null;
 }
 
+Iterable<XmlElement>? getAll(XmlElement? xml, String name) {
+  if (xml == null) return null;
+  final result = xml.findAllElements(name);
+  return result.isNotEmpty ? result : null;
+}
+
 /// Specifies the days since the initiation of an incomplete multipart upload that Amazon S3 will wait before permanently removing all parts of the upload. For more information, see Aborting Incomplete Multipart Uploads Using a Bucket Lifecycle Policy in the Amazon Simple Storage Service Developer Guide.
 class AbortIncompleteMultipartUpload {
   AbortIncompleteMultipartUpload(
@@ -4259,6 +4265,7 @@ class Tag {
         builder.element('Value', nest: value);
       },
     );
+
     return builder.buildDocument();
   }
 
@@ -4269,6 +4276,46 @@ class Tag {
   String? value;
 }
 
+class Tags {
+  Tags(
+    this.tagSet,
+  );
+
+  Tags.fromXml(XmlElement? xml) {
+    final tags = getAll(xml, 'Tag');
+    if (tags == null) return;
+
+    tagSet = {};
+    for (final tag in tags) {
+      final t = Tag.fromXml(tag);
+      tagSet![t.key] = t.value;
+    }
+  }
+
+  XmlNode toXml() {
+    final builder = XmlBuilder();
+    builder.element(
+      'TagSet',
+      nest: () {
+        tagSet?.forEach((k, v) {
+          builder.element('Tag', nest: () {
+            builder.element('Key', nest: k);
+            builder.element('Value', nest: v);
+          },);
+        });
+      },
+    );
+    return builder.buildDocument().rootElement;
+  }
+
+  int length() {
+    return tagSet == null ? 0 : tagSet!.length;
+  }
+
+  /// A collection for a set of tags
+  Map<String?, String?>? tagSet;
+}
+
 /// Container for TagSet elements.
 class Tagging {
   Tagging(
@@ -4276,22 +4323,17 @@ class Tagging {
   );
 
   Tagging.fromXml(XmlElement? xml) {
-    tagSet = Tag.fromXml(getProp(xml, 'TagSet'));
+    tagSet = Tags.fromXml(getProp(xml, 'TagSet'));
   }
 
   XmlNode toXml() {
     final builder = XmlBuilder();
-    builder.element(
-      'Tagging',
-      nest: () {
-        builder.element('TagSet', nest: tagSet!.toXml());
-      },
-    );
-    return builder.buildDocument();
+    builder.element('Tagging', nest: tagSet!.toXml());
+    return builder.buildDocument().rootElement;
   }
 
   /// A collection for a set of tags
-  Tag? tagSet;
+  Tags? tagSet;
 }
 
 /// Container for granting information.

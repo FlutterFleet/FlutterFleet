@@ -72,6 +72,26 @@ class MinioInvalidPrefixError extends MinioError {
   }
 }
 
+class MinioInvalidTagsError extends MinioError {
+  MinioInvalidTagsError(String super.message);
+
+  static void check(Tags tags) {
+    if (!isValidTagSize(tags.length())) {
+      throw MinioInvalidTagsError('Only $maxObjectTags object tags allowed.');
+    }
+    if (tags.tagSet != null) {
+      tags.tagSet?.forEach((key, value) {
+        if (!isValidTagName(key!)) {
+          throw MinioInvalidTagsError('Invalid tag key: $key');
+        }
+        if (!isValidTagName(value!)) {
+          throw MinioInvalidTagsError('Invalid tag value: $value');
+        }
+      });
+    }
+  }
+}
+
 class MinioInvalidBucketPolicyError extends MinioError {
   MinioInvalidBucketPolicyError(String super.message);
 }
