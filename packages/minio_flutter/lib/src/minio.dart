@@ -1112,14 +1112,15 @@ class Minio {
     final payload = Tagging(tags).toXml().toString();
     final headers = {'Content-MD5': md5Base64(payload)};
 
-    await _client.request(
+    final resp = await _client.request(
       method: 'PUT',
       bucket: bucket,
       object: object,
-      resource: 'tagging',
+      queries: {'tagging': ''},
       payload: payload,
       headers: headers,
     );
+    validate(resp, expect: 200);
   }
 
   Future<void> setObjectACL(String bucket, String object, String policy) async {
@@ -1145,9 +1146,7 @@ class Minio {
     );
     validate(resp, expect: 200);
     return Tagging.fromXml(
-        xml.XmlDocument.parse(resp.body)
-          .findElements('Tagging')
-          .first,
+      xml.XmlDocument.parse(resp.body).findElements('Tagging').first,
     ).tagSet;
   }
 

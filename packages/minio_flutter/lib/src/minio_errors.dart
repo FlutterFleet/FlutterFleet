@@ -77,7 +77,7 @@ class MinioInvalidTagsError extends MinioError {
 
   static void check(Tags tags) {
     if (!isValidTagSize(tags.length())) {
-      throw MinioInvalidTagsError('Only $maxTags object tags allowed.');
+      throw MinioInvalidTagsError('Only $maxObjectTags object tags allowed.');
     }
     if (tags.tagSet != null) {
       tags.tagSet?.forEach((key, value) {
@@ -87,8 +87,7 @@ class MinioInvalidTagsError extends MinioError {
         if (!isValidTagName(value!)) {
           throw MinioInvalidTagsError('Invalid tag value: $value');
         }
-
-      });      
+      });
     }
   }
 }

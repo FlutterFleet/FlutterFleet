@@ -4265,6 +4265,7 @@ class Tag {
         builder.element('Value', nest: value);
       },
     );
+
     return builder.buildDocument();
   }
 
@@ -4297,11 +4298,14 @@ class Tags {
       'TagSet',
       nest: () {
         tagSet?.forEach((k, v) {
-          builder.element('Tag', nest: Tag(k, v).toXml());
-        });        
+          builder.element('Tag', nest: () {
+            builder.element('Key', nest: k);
+            builder.element('Value', nest: v);
+          },);
+        });
       },
     );
-    return builder.buildDocument();
+    return builder.buildDocument().rootElement;
   }
 
   int length() {
@@ -4324,13 +4328,8 @@ class Tagging {
 
   XmlNode toXml() {
     final builder = XmlBuilder();
-    builder.element(
-      'Tagging',
-      nest: () {
-        builder.element('TagSet', nest: tagSet!.toXml());
-      },
-    );
-    return builder.buildDocument();
+    builder.element('Tagging', nest: tagSet!.toXml());
+    return builder.buildDocument().rootElement;
   }
 
   /// A collection for a set of tags
