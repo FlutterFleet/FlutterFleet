@@ -5,8 +5,8 @@ homepage: https://www.kjxbyz.com/flutterfleet
 repository: https://github.com/FlutterFleet/FlutterFleet/tree/main/packages/dxcaptcha_flutter
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
-  flutter: '>=3.16.0'
+  sdk: '>=3.5.4 <4.0.0'
+  flutter: '>=3.24.4'
 
 dependencies:
   flutter:
