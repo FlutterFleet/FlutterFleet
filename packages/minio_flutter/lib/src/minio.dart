@@ -598,7 +598,6 @@ class Minio {
       bucket: bucket,
       queries: queries,
     );
-
     validate(resp);
 
     final node = xml.XmlDocument.parse(resp.body);
@@ -1102,6 +1101,28 @@ class Minio {
     validate(resp, expect: 204);
   }
 
+  Future<void> setObjectTags(
+    String bucket,
+    String object,
+    Tags tags,
+  ) async {
+    MinioInvalidBucketNameError.check(bucket);
+    MinioInvalidObjectNameError.check(object);
+    MinioInvalidTagsError.check(tags);
+    final payload = Tagging(tags).toXml().toString();
+    final headers = {'Content-MD5': md5Base64(payload)};
+
+    final resp = await _client.request(
+      method: 'PUT',
+      bucket: bucket,
+      object: object,
+      queries: {'tagging': ''},
+      payload: payload,
+      headers: headers,
+    );
+    validate(resp, expect: 200);
+  }
+
   Future<void> setObjectACL(String bucket, String object, String policy) async {
     MinioInvalidBucketNameError.check(bucket);
     MinioInvalidObjectNameError.check(object);
@@ -1112,6 +1133,21 @@ class Minio {
       object: object,
       queries: {'acl': policy},
     );
+  }
+
+  Future<Tags?> getObjectTags(String bucket, String object) async {
+    MinioInvalidBucketNameError.check(bucket);
+    MinioInvalidObjectNameError.check(object);
+    final resp = await _client.request(
+      method: 'GET',
+      bucket: bucket,
+      object: object,
+      resource: 'tagging',
+    );
+    validate(resp, expect: 200);
+    return Tagging.fromXml(
+      xml.XmlDocument.parse(resp.body).findElements('Tagging').first,
+    ).tagSet;
   }
 
   Future<AccessControlPolicy> getObjectACL(String bucket, String object) async {
